@@ -1,7 +1,7 @@
 from pathlib import Path
 import pytesseract
 
-ROOT_FOLDER = Path(__file__).parents[1].absolute()
+ROOT_FOLDER = Path(__file__).parents[2].absolute()
 OUTPUT_FOLDER = ROOT_FOLDER / "out"
 
 
@@ -12,8 +12,9 @@ pix_x, pix_y = 2560, 1080
 KEY_LOOKUP = {
     "a": "Left",
     "d": "Right",
-    "1": "Flame Shock",
-    "2": "Lightning Bolt",
-    "r": "Earth Shock",
-    "f": "Stoneclaw"
+    "1": "Fel Rush",
+    "q": "Fel Blade",
+    "3": "Immolation Aura",
+    "2": "Blade Dance",
+    "e": "Chaos Strike"
 }
