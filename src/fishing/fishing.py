@@ -9,8 +9,8 @@ import soundfile as sf
 import matplotlib.pyplot as plt
 import cv2
 
-pix_x, pix_y = 2560, 1080
-
+pix_x, pix_y = config.pix_x, config.pix_y
+SAMPLE_RATE = 48000
 
 w = 250
 h = 250
@@ -18,24 +18,24 @@ x = pix_x / 2 - w / 2
 y = -100 + pix_y / 2 - h / 2
 
 
+def randomly_turn():
+    if uniform() < 0.05:
+        amount = uniform(0.0005, 0.002)
+        hold_key("Left", amount)
+        sleep(0.7)
+        hold_key("Right", amount)
+        sleep(0.7)
+
+
 def hold_key(keybind, seconds=1.00):
     key = config.KEY_LOOKUP[keybind]
-    print(f"Action: {keybind} -> {key} for {seconds:.2f} seconds.")
+    print(f"Action: {keybind} -> {key} for {seconds:.4f} seconds.")
     pyautogui.keyDown(key)
     sleep(seconds)
     pyautogui.keyUp(key)
 
 
-def move_cursor_to_bait(j):
-    _, coords = get_img(j)
-    mouse_x = x + coords[0]
-    mouse_y = y + coords[1]
-    print(f"{j} moving cursor to bait @ {mouse_x, mouse_y} ...")
-    pyautogui.moveTo(mouse_x, mouse_y, uniform(0.2, 0.7), pyautogui.easeOutQuad)
-
-
 def get_sound(i):
-    SAMPLE_RATE = 48000  # [Hz]. sampling rate.
     SEC = 1
 
     with sc.get_microphone(id=str(sc.default_speaker().name), include_loopback=True).recorder(
@@ -45,7 +45,7 @@ def get_sound(i):
 
         mean = sum(np.absolute(data)) / len(data)
         mean = mean[0]
-        caught_fish = True if mean > 0.001 else False
+        caught_fish = True if mean > 0.002 else False
         print(f"{i} fish volume = {mean:9.5f} --> catch = {caught_fish}")
         plt.plot(data)
         plt.savefig(config.OUTPUT_FOLDER / f"signal_{i}.jpg")
@@ -57,9 +57,18 @@ def get_sound(i):
     return caught_fish
 
 
-def get_img(i):
+def move_cursor_to_bait():
+    _, coords = get_img()
+    mouse_x = x + coords[0]
+    mouse_y = y + coords[1]
+    print(f"Moving cursor to bait @ {mouse_x, mouse_y} ...")
+    pyautogui.moveTo(mouse_x, mouse_y, uniform(0.2, 0.7), pyautogui.easeOutQuad)
+
+
+def get_img():
     img = pyautogui.screenshot(region=(x, y, w, h))
     img = np.array(img)
+    img_raw = img.copy()
 
     img[:, :, 1] = 0
     img[:, :, 2] = 0
@@ -67,21 +76,28 @@ def get_img(i):
     img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     img_gray_blurred = cv2.blur(img_gray, (20, 20))
     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(img_gray_blurred)
+    cv2.circle(img_raw, max_loc, 5, 255, 2)
     cv2.circle(img_gray, max_loc, 5, 255, 2)
 
-    ss.save_img(f"status_{i}.png", img+40)
-    ss.save_img(f"status_blurred_{i}.png", img_gray+40)
+    ss.save_img(f"status.png", img_raw)
+    ss.save_img(f"status_blurred.png", img_gray + 100)
 
     return img, max_loc
 
 
 def countdown_timer():
     # Countdown timer
-    print("Starting to fish. Click on Warcraft window ...", end="", flush=True)
+    window = pyautogui.getWindowsWithTitle("World of Warcraft")[0]
+    while not window.isActive:
+        print("Please click on WoW window")
+        print("", end="", flush=True)
+        sleep(2)
+    print("*"*100)
+    print("Starting to fish...")
+    print(f"Audio sample Rate = {SAMPLE_RATE:,} Hz")
     for i in range(0, 1):
         print(".", end="", flush=True)
-        sleep(1)
-    print("Go")
+        sleep(2)
 
 
 def fish():
@@ -89,20 +105,22 @@ def fish():
     ss.setup()
     counter = 1
     while True:
+        print("*"*100)
+        randomly_turn()
         if counter % 150 == 0:
             hold_key("Oversized Bobber")
         print(f"Fish iteration = {counter}")
         hold_key("Fish", uniform(0.9, 1.1))
         sleep(uniform(0.0, 0.2))
-        move_cursor_to_bait(0)
+        move_cursor_to_bait()
         for i in range(8):
             hear_fish_sound = get_sound(i)
             if hear_fish_sound:
                 pyautogui.click(button='right')
                 print("Fish caught!!!")
-                sleep(1)
+                sleep(1.2)
                 break
-            sleep(1)
+            sleep(0.8)
         counter += 1
 
 
