@@ -19,13 +19,7 @@ def turn_around():
         turner["start"] = datetime.datetime.now()
 
 
-def hold_key(key, seconds=1.00):
-    if key in config.KEY_LOOKUP.keys():
-        print(f"Action: {key} -> {config.KEY_LOOKUP[key]} for {seconds:.2f} seconds.")
-    pyautogui.keyDown(key)
-    sleep(seconds)
-    pyautogui.keyUp(key)
-    sleep(config.DELAY_BETWEEN_COMMANDS)
+
 
 
 def turn_to_nameplate(cx, middle = ss.MIDDLE):
@@ -91,13 +85,6 @@ def go():
             hold_key('2', 2.0)
 
 
-def countdown_timer():
-    # Countdown timer
-    print("Starting", end="", flush=True)
-    for i in range(0, 3):
-        print(".", end="", flush=True)
-        sleep(1)
-    print("Go")
 
 
 def main():
