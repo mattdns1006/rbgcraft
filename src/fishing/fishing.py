@@ -20,8 +20,7 @@ y = -100 + pix_y / 2 - h / 2
 
 def hold_key(keybind, seconds=1.00):
     key = config.KEY_LOOKUP[keybind]
-    if key in config.KEY_LOOKUP.keys():
-        print(f"Action: {keybind} -> {key} for {seconds:.2f} seconds.")
+    print(f"Action: {keybind} -> {key} for {seconds:.2f} seconds.")
     pyautogui.keyDown(key)
     sleep(seconds)
     pyautogui.keyUp(key)
@@ -31,8 +30,8 @@ def move_cursor_to_bait(j):
     _, coords = get_img(j)
     mouse_x = x + coords[0]
     mouse_y = y + coords[1]
-    print(f"{j} moving cursor to bait {mouse_x, mouse_y} ...")
-    pyautogui.moveTo(mouse_x, mouse_y)
+    print(f"{j} moving cursor to bait @ {mouse_x, mouse_y} ...")
+    pyautogui.moveTo(mouse_x, mouse_y, uniform(0.2, 0.7), pyautogui.easeOutQuad)
 
 
 def get_sound(i):
@@ -47,7 +46,7 @@ def get_sound(i):
         mean = sum(np.absolute(data)) / len(data)
         mean = mean[0]
         caught_fish = True if mean > 0.001 else False
-        print(f"{i} volume = {mean:9.5f} --> fish caught sound = {caught_fish}")
+        print(f"{i} fish volume = {mean:9.5f} --> catch = {caught_fish}")
         plt.plot(data)
         plt.savefig(config.OUTPUT_FOLDER / f"signal_{i}.jpg")
         plt.close()
@@ -97,13 +96,13 @@ def fish():
         sleep(uniform(0.0, 0.2))
         move_cursor_to_bait(0)
         for i in range(8):
-            caught_fish = get_sound(i)
-            if caught_fish:
-                hold_key("Interact", uniform(0.02, 0.1))
+            hear_fish_sound = get_sound(i)
+            if hear_fish_sound:
+                pyautogui.click(button='right')
                 print("Fish caught!!!")
-                sleep(uniform(0.1, 0.2))
+                sleep(1)
                 break
-            sleep(uniform(0.7, 1.3))
+            sleep(1)
         counter += 1
 
 
