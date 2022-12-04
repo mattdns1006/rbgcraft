@@ -1,7 +1,7 @@
 from pathlib import Path
 import pytesseract
 
-ROOT_FOLDER = Path(__file__).parents[2].absolute()
+ROOT_FOLDER = Path(__file__).parents[1].absolute()
 OUTPUT_FOLDER = ROOT_FOLDER / "out"
 
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract"

@@ -1,1 +1,1 @@
-from fishing import fishing
+from .fishing import fish

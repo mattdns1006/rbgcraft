@@ -59,11 +59,15 @@ def get_sound(i):
 
 
 def move_cursor_to_bait():
-    _, coords = get_img()
+    img, coords = get_img()
     mouse_x = x + coords[0]
     mouse_y = y + coords[1]
     print(f"Moving cursor to bait @ {mouse_x, mouse_y} ...")
     pyautogui.moveTo(mouse_x, mouse_y, uniform(0.2, 0.7), pyautogui.easeOutQuad)
+
+    img = pyautogui.screenshot(region=(x, y, w, h))
+    img = np.array(img)
+    ss.save_img(f"status_cursor.png", img[:, :, ::-1])
 
 
 def get_img():
@@ -81,7 +85,6 @@ def get_img():
     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(img_gray_blurred)
     cv2.circle(img_raw, max_loc, 5, 255, 2)
     cv2.circle(img_gray_blurred_for_display, max_loc, 5, 255, 2)
-
 
     ss.save_img(f"status.png", img_raw[:, :, ::-1])
     ss.save_img(f"status_blurred.png", img_gray_blurred_for_display)
