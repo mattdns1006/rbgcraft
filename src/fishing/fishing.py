@@ -19,12 +19,12 @@ y = -100 + pix_y / 2 - h / 2
 
 
 def randomly_turn():
-    if uniform() < 0.05:
-        amount = uniform(0.0005, 0.002)
+    if uniform() < 0.1:
+        amount = uniform(0.0005, 0.001)
         hold_key("Left", amount)
-        sleep(0.7)
+        sleep(1.0)
         hold_key("Right", amount)
-        sleep(0.7)
+        sleep(1.0)
 
 
 def hold_key(keybind, seconds=1.00):
@@ -48,7 +48,8 @@ def get_sound(i):
         caught_fish = True if mean > 0.002 else False
         print(f"{i} fish volume = {mean:9.5f} --> catch = {caught_fish}")
         plt.plot(data)
-        plt.savefig(config.OUTPUT_FOLDER / f"signal_{i}.jpg")
+        plt.savefig(config.OUTPUT_FOLDER / f"audio_signal_{i}.png")
+        plt.savefig(config.OUTPUT_FOLDER / f"audio_signal.png")
         plt.close()
 
         filename = config.OUTPUT_FOLDER / f"sound_{i}.wav"
@@ -75,12 +76,15 @@ def get_img():
 
     img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     img_gray_blurred = cv2.blur(img_gray, (20, 20))
+    img_gray_blurred_for_display = \
+        cv2.normalize(img_gray_blurred, None, 0, 255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F)
     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(img_gray_blurred)
     cv2.circle(img_raw, max_loc, 5, 255, 2)
-    cv2.circle(img_gray, max_loc, 5, 255, 2)
+    cv2.circle(img_gray_blurred_for_display, max_loc, 5, 255, 2)
 
-    ss.save_img(f"status.png", img_raw)
-    ss.save_img(f"status_blurred.png", img_gray + 100)
+
+    ss.save_img(f"status.png", img_raw[:, :, ::-1])
+    ss.save_img(f"status_blurred.png", img_gray_blurred_for_display)
 
     return img, max_loc
 
@@ -103,7 +107,7 @@ def countdown_timer():
 def fish():
     countdown_timer()
     ss.setup()
-    counter = 1
+    counter = 0
     while True:
         print("*"*100)
         randomly_turn()
