@@ -13,5 +13,7 @@ KEY_LOOKUP = {
     "Left": "a",
     "Right": "d",
     "Fish": "9",
-    "Oversized Bobber": "0"
+    "Oversized Bobber": "0",
+    "Esc": "Escape",
+    "Enter": "Enter"
 }

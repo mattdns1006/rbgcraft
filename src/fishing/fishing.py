@@ -1,5 +1,5 @@
-from src.fishing import screenshot as ss
-from src.fishing import config
+from . import screenshot as ss
+from . import config
 import pyautogui
 import numpy as np
 from numpy.random import uniform
@@ -104,6 +104,26 @@ def countdown_timer():
         sleep(2)
 
 
+def wait():
+    wait_time = np.random.exponential(3)
+    print(f"Waiting for {wait_time:.3f} seconds ... ")
+    sleep(wait_time)
+
+
+def logout():
+    print("Logging out")
+    hold_key("Esc", 1.0)
+    hold_key("Esc", 1.0)
+    hold_key("Enter", 1.0)
+    pyautogui.write(r'/logout', interval=uniform(0.03, 0.2))
+    hold_key("Enter", 1.0)
+
+
+def login():
+    print("Logging in from character selection screen")
+    hold_key("Enter", 1.0)
+
+
 def fish():
     countdown_timer()
     ss.setup()
@@ -122,11 +142,8 @@ def fish():
             if hear_fish_sound:
                 pyautogui.click(button='right')
                 print("Fish caught!!!")
-                sleep(1.2)
+                wait()
                 break
             sleep(0.8)
         counter += 1
 
-
-if __name__ == "__main__":
-    fish()
