@@ -15,9 +15,13 @@ todo
 
 ### Running the project
 
-To run fishing script:
+Install via
+```commandline
+python setup.py install
+```
+
 ```python
-from rgbcraft import fishing
+import fishing
 fishing.fish()
 ```
 
