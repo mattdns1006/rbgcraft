@@ -47,9 +47,12 @@ def get_sound(i):
         mean = mean[0]
         caught_fish = True if mean > 0.002 else False
         print(f"{i} fish volume = {mean:9.5f} --> catch = {caught_fish}")
+        plt.figure(figsize=(5, 1))
         plt.plot(data)
-        plt.savefig(config.OUTPUT_FOLDER / f"audio_signal_{i}.png")
-        plt.savefig(config.OUTPUT_FOLDER / f"audio_signal.png")
+        plt.ylim(-0.12, 0.12)
+        plt.title(f"Last {SEC} second(s) of audio", size=7)
+        plt.savefig(config.OUTPUT_FOLDER / f"audio_signal_{i}.png", bbox_inches='tight')
+        plt.savefig(config.OUTPUT_FOLDER / f"audio_signal.png", bbox_inches='tight')
         plt.close()
 
         filename = config.OUTPUT_FOLDER / f"sound_{i}.wav"
@@ -92,21 +95,6 @@ def get_img():
     return img, max_loc
 
 
-def countdown_timer():
-    # Countdown timer
-    window = pyautogui.getWindowsWithTitle("World of Warcraft")[0]
-    while not window.isActive:
-        print("Please click on WoW window")
-        print("", end="", flush=True)
-        sleep(2)
-    print("*"*100)
-    print("Starting to fish...")
-    print(f"Audio sample Rate = {SAMPLE_RATE:,} Hz")
-    for i in range(0, 1):
-        print(".", end="", flush=True)
-        sleep(2)
-
-
 def wait():
     wait_time = np.random.exponential(3)
     print(f"Waiting for {wait_time:.3f} seconds ... ")
@@ -127,15 +115,31 @@ def login():
     hold_key("Enter", 1.0)
 
 
+def setup():
+    print(f"Creating folder '{config.OUTPUT_FOLDER}' (check images here to see fish zone for debugging)")
+    if not config.OUTPUT_FOLDER.exists():
+        config.OUTPUT_FOLDER.mkdir()
+
+    # Countdown timer
+    window = pyautogui.getWindowsWithTitle("World of Warcraft")[0]
+    while not window.isActive:
+        print("Please click on WoW window")
+        print("", end="", flush=True)
+        sleep(2)
+    print("*"*100)
+    print("Starting to fish...")
+    print(f"Audio sample Rate = {SAMPLE_RATE:,} Hz")
+    for i in range(0, 1):
+        print(".", end="", flush=True)
+        sleep(2)
+
+
 def fish():
-    countdown_timer()
-    ss.setup()
+    setup()
     counter = 0
     while True:
         print("*"*100)
         randomly_turn()
-        if counter % 150 == 0:
-            hold_key("Oversized Bobber")
         print(f"Fish iteration = {counter}")
         hold_key("Fish", uniform(0.9, 1.1))
         sleep(uniform(0.0, 0.2))

@@ -27,17 +27,6 @@ def plot_histograms():
         plt.savefig(fname)
 
 
-def setup():
-
-    print("Creating folders")
-    if not config.OUTPUT_FOLDER.exists():
-        config.OUTPUT_FOLDER.mkdir()
-
-    print("Removing image files...")
-    for temp_file in glob.glob(str(config.OUTPUT_FOLDER / "*.png")):
-        os.remove(temp_file)
-
-
 def get_status_img(i, w, h, x, y):
 
 
