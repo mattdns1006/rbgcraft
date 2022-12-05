@@ -1,7 +1,7 @@
-from . import screenshot as ss
 from . import config
 import pyautogui
 import numpy as np
+import PIL.ImageOps
 from numpy.random import uniform
 from time import sleep
 import soundcard as sc
@@ -17,16 +17,10 @@ x = pix_x / 2 - w / 2
 y = -100 + pix_y / 2 - h / 2
 
 
-def randomly_turn():
-    if uniform() < 0.1:
-        amount = uniform(0.0005, 0.001)
-        hold_key("Left", amount)
-        sleep(1.0)
-        hold_key("Right", amount)
-        sleep(1.0)
-
-
 def hold_key(keybind, seconds=1.00):
+    """
+    Holds key down for seconds according to config.KEY_LOOKUP
+    """
     key = config.KEY_LOOKUP[keybind]
     print(f"Action: {keybind} -> {key} for {seconds:.4f} seconds.")
     pyautogui.keyDown(key)
@@ -35,7 +29,10 @@ def hold_key(keybind, seconds=1.00):
 
 
 def get_sound(i):
-
+    """
+    Get desktop sound and infer whether a significant (fish catch) sound has been inferred via an audio signal with
+    a high enough volume, according to config.SOUND_THRESH
+    """
     with sc.get_microphone(id=str(sc.default_speaker().name), include_loopback=True).recorder(
             samplerate=config.SAMPLE_RATE) as mic:
         # record audio with loopback from default speaker.
@@ -43,7 +40,7 @@ def get_sound(i):
 
         mean = sum(np.absolute(data)) / len(data)
         mean = mean[0]
-        caught_fish = True if mean > 0.002 else False
+        caught_fish = True if mean > config.SOUND_THRESH else False
         print(f"{i} fish volume = {mean:9.5f} --> catch = {caught_fish}")
         plt.figure(figsize=(5, 1))
         plt.plot(data)
@@ -59,8 +56,21 @@ def get_sound(i):
     return caught_fish
 
 
+def save_img(filename: str, img: np.array):
+    """
+    Save image to output folder
+    """
+    if isinstance(img, PIL.Image.Image):
+        img.save(config.OUTPUT_FOLDER / filename)
+    else:
+        cv2.imwrite(str(config.OUTPUT_FOLDER / filename), img)
+
+
 def move_cursor_to_bait():
-    img, coords = get_img()
+    """
+    Move mouse cursor to fish bait using screenshot and coordinates
+    """
+    img, coords = get_fishing_zone_and_bait_coords()
     mouse_x = x + coords[0]
     mouse_y = y + coords[1]
     print(f"Moving cursor to bait @ {mouse_x, mouse_y} ...")
@@ -68,10 +78,14 @@ def move_cursor_to_bait():
 
     img = pyautogui.screenshot(region=(x, y, w, h))
     img = np.array(img)
-    ss.save_img(f"status_cursor.png", img[:, :, ::-1])
+    save_img(f"status_cursor.png", img[:, :, ::-1])
 
 
-def get_img():
+def get_fishing_zone_and_bait_coords():
+    """
+    Screen shot the fishing zone, process the image and infer the bait by using the part of the red channel of the
+    image with the most brightness
+    """
     img = pyautogui.screenshot(region=(x, y, w, h))
     img = np.array(img)
     img_raw = img.copy()
@@ -87,19 +101,25 @@ def get_img():
     cv2.circle(img_raw, max_loc, 5, 255, 2)
     cv2.circle(img_gray_blurred_for_display, max_loc, 5, 255, 2)
 
-    ss.save_img(f"status.png", img_raw[:, :, ::-1])
-    ss.save_img(f"status_blurred.png", img_gray_blurred_for_display)
+    save_img(f"status.png", img_raw[:, :, ::-1])
+    save_img(f"status_blurred.png", img_gray_blurred_for_display)
 
     return img, max_loc
 
 
 def wait():
+    """
+    Wait for a random amount of time using exponential rng distribution
+    """
     wait_time = np.random.exponential(config.WAIT_PARAMETER)
     print(f"Waiting for {wait_time:.3f} seconds ... ")
     sleep(wait_time)
 
 
 def logout():
+    """
+    Log character out of game into character selection screen
+    """
     print("Logging out")
     hold_key("Esc", 1.0)
     hold_key("Esc", 1.0)
@@ -109,11 +129,18 @@ def logout():
 
 
 def login():
+    """
+    Login to game
+    """
     print("Logging in from character selection screen")
     hold_key("Enter", 1.0)
 
 
 def setup():
+    """
+    Create output folder for debugging
+    Ensure correct window is active before fishing
+    """
     print(f"Creating folder '{config.OUTPUT_FOLDER}' (check images here to see fish zone for debugging)")
     if not config.OUTPUT_FOLDER.exists():
         config.OUTPUT_FOLDER.mkdir()
@@ -129,14 +156,17 @@ def setup():
 
 
 def fish():
+    """
+    Main wrapper function to fish.
+    """
     setup()
     counter = 0
     while True:
         print("\n")
-        print("*"*10)
+        print("*" * 10)
         print(f"Fish iteration = {counter}")
         hold_key("Fish", uniform(0.9, 1.1))  # throw fish line
-        sleep(uniform(0.1, 0.3)) # wait to move cursor
+        sleep(uniform(0.1, 0.3))  # wait to move cursor
         move_cursor_to_bait()
         for i in range(8):
             hear_fish_sound = get_sound(i)
@@ -148,4 +178,3 @@ def fish():
                 break
             sleep(0.8)  # wait between sounds
         counter += 1
-
