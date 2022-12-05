@@ -20,6 +20,11 @@ Install via
 python setup.py install
 ```
 
+Run via:
+```commandline
+python -c "import fishing; fishing.fish()"
+```
+or
 ```python
 import fishing
 fishing.fish()

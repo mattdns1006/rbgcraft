@@ -1,8 +1,10 @@
 from pathlib import Path
 
-OUTPUT_FOLDER = Path(r"C:\temp\rgbcraft")
-DELAY_BETWEEN_COMMANDS = 0.00
-pix_x, pix_y = 2560, 1080
+OUTPUT_FOLDER = Path(r"C:\temp\rgbcraft")  # where to save outputs (images/audio plots) for debugging
+PIX_X, PIX_Y = 2560, 1080  # size of screen in pixels
+SEC = 1
+SAMPLE_RATE = 48000  # audio sample rate
+WAIT_PARAMETER = 2  # parameter passed to exponential distribution to sample wait time in seconds
 
 KEY_LOOKUP = {
     "Interact": "8",

@@ -29,7 +29,6 @@ def plot_histograms():
 
 def get_status_img(i, w, h, x, y):
 
-
     img = pyautogui.screenshot(region=(x, y, w, h))
     r, _, _ = img.split()  # only need red
     thresh = 180

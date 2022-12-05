@@ -9,8 +9,7 @@ import soundfile as sf
 import matplotlib.pyplot as plt
 import cv2
 
-pix_x, pix_y = config.pix_x, config.pix_y
-SAMPLE_RATE = 48000
+pix_x, pix_y = config.PIX_X, config.PIX_Y
 
 w = 250
 h = 250
@@ -36,12 +35,11 @@ def hold_key(keybind, seconds=1.00):
 
 
 def get_sound(i):
-    SEC = 1
 
     with sc.get_microphone(id=str(sc.default_speaker().name), include_loopback=True).recorder(
-            samplerate=SAMPLE_RATE) as mic:
+            samplerate=config.SAMPLE_RATE) as mic:
         # record audio with loopback from default speaker.
-        data = mic.record(numframes=SAMPLE_RATE * SEC)
+        data = mic.record(numframes=config.SAMPLE_RATE * config.SEC)
 
         mean = sum(np.absolute(data)) / len(data)
         mean = mean[0]
@@ -50,14 +48,14 @@ def get_sound(i):
         plt.figure(figsize=(5, 1))
         plt.plot(data)
         plt.ylim(-0.12, 0.12)
-        plt.title(f"Last {SEC} second(s) of audio", size=7)
+        plt.title(f"Last {config.SEC} second(s) of audio", size=7)
         plt.savefig(config.OUTPUT_FOLDER / f"audio_signal_{i}.png", bbox_inches='tight')
         plt.savefig(config.OUTPUT_FOLDER / f"audio_signal.png", bbox_inches='tight')
         plt.close()
 
         filename = config.OUTPUT_FOLDER / f"sound_{i}.wav"
         # change "data=data[:, 0]" to "data=data", if you would like to write audio as multiple-channels.
-        sf.write(file=filename, data=data[:, 0], samplerate=SAMPLE_RATE)
+        sf.write(file=filename, data=data[:, 0], samplerate=config.SAMPLE_RATE)
     return caught_fish
 
 
@@ -96,7 +94,7 @@ def get_img():
 
 
 def wait():
-    wait_time = np.random.exponential(3)
+    wait_time = np.random.exponential(config.WAIT_PARAMETER)
     print(f"Waiting for {wait_time:.3f} seconds ... ")
     sleep(wait_time)
 
@@ -128,29 +126,26 @@ def setup():
         sleep(2)
     print("*"*100)
     print("Starting to fish...")
-    print(f"Audio sample Rate = {SAMPLE_RATE:,} Hz")
-    for i in range(0, 1):
-        print(".", end="", flush=True)
-        sleep(2)
 
 
 def fish():
     setup()
     counter = 0
     while True:
-        print("*"*100)
-        randomly_turn()
+        print("\n")
+        print("*"*10)
         print(f"Fish iteration = {counter}")
-        hold_key("Fish", uniform(0.9, 1.1))
-        sleep(uniform(0.0, 0.2))
+        hold_key("Fish", uniform(0.9, 1.1))  # throw fish line
+        sleep(uniform(0.1, 0.3)) # wait to move cursor
         move_cursor_to_bait()
         for i in range(8):
             hear_fish_sound = get_sound(i)
             if hear_fish_sound:
                 pyautogui.click(button='right')
+                sleep(0.5)  # always wait at least 0.5 seconds to loot
                 print("Fish caught!!!")
-                wait()
+                wait()  # wait random amount of time after catching
                 break
-            sleep(0.8)
+            sleep(0.8)  # wait between sounds
         counter += 1
 
