@@ -44,8 +44,8 @@ def get_sound(i):
         print(f"Couldn't find speaker device '{speaker_id}'. Available options are:")
         for speaker in sc.all_speakers():
             print(speaker.name)
-            print("Set config.SPEAKER_ID to one of the above speakers listed")
-            sys.exit(1)
+        print("Set 'config.SPEAKER_ID' to one of the speakers listed above")
+        sys.exit(1)
 
     # infer volume from record
     mean = sum(np.absolute(data)) / len(data)

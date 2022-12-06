@@ -36,6 +36,9 @@ Setup the game as follows:
 Setup program configuration:
 * Keybind fish action to 9, or change ```KEY_LOOKUP``` in the [config](fishing/config.py).
 * Set up screen size, or change ```PIX_X``` and ```PIX_Y```, in the [config](fishing/config.py). Defaults to 2560 x 1080.
+* Optionally configure speaker to listen to for fish sounds using ```SPEAKER_ID``` in [config](fishing/config.py). Uses system default speaker by default. 
+Ensure game sound is coming from the same speaker. This allows the user to e.g. listen to music on a different speaker
+whilst fishing.
 
 The package can then be installed as follows:
 ```commandline
