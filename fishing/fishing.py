@@ -13,9 +13,9 @@ import sys
 pix_x, pix_y = config.PIX_X, config.PIX_Y
 
 w = 250
-h = 250
+h = 400
 x = pix_x / 2 - w / 2
-y = -100 + pix_y / 2 - h / 2
+y = -150 + pix_y / 2 - h / 2
 
 
 def hold_key(keybind, seconds=1.00):
@@ -177,7 +177,7 @@ def fish(hours: float = 3.0 / 6):
     start_time = time()  # remember when we started
     seconds_to_run = hours * 60 * 60
     mins_to_run = seconds_to_run / 60
-    print(f"Running for {mins_to_run:,} minutes)")
+    print(f"Running for {mins_to_run:,} minutes")
     counter = 0
     not_elapsed_time = True
     while not_elapsed_time:
