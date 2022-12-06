@@ -166,7 +166,7 @@ def fish():
         print("*" * 10)
         print(f"Fish iteration = {counter}")
         hold_key("Fish", uniform(0.9, 1.1))  # throw fish line
-        sleep(uniform(0.1, 0.3))  # wait to move cursor
+        sleep(uniform(0.3, 0.5))  # wait to move cursor
         move_cursor_to_bait()
         for i in range(8):
             hear_fish_sound = get_sound(i)
