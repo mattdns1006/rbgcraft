@@ -1,5 +1,6 @@
 from pathlib import Path
 
+SPEAKER_ID = None  # speaker to listen to for fish sound
 SOUND_THRESH = 0.002  # sound threshold for catching fish.
 OUTPUT_FOLDER = Path(r"C:\temp\rgbcraft")  # where to save outputs (images/audio plots) for debugging
 PIX_X, PIX_Y = 2560, 1080  # size of screen in pixels

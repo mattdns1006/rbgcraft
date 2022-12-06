@@ -8,6 +8,7 @@ import soundcard as sc
 import soundfile as sf
 import matplotlib.pyplot as plt
 import cv2
+import sys
 
 pix_x, pix_y = config.PIX_X, config.PIX_Y
 
@@ -30,29 +31,41 @@ def hold_key(keybind, seconds=1.00):
 
 def get_sound(i):
     """
-    Get desktop sound and infer whether a significant (fish catch) sound has been inferred via an audio signal with
-    a high enough volume, according to config.SOUND_THRESH
+    Get speaker sound (defined in config.SPEAKER_ID) and use a significant sound (volume0 as inference that a fish has
+    been caught, according to config.SOUND_THRESH
     """
-    with sc.get_microphone(id=str(sc.default_speaker().name), include_loopback=True).recorder(
-            samplerate=config.SAMPLE_RATE) as mic:
-        # record audio with loopback from default speaker.
-        data = mic.record(numframes=config.SAMPLE_RATE * config.SEC)
+    speaker_id = sc.default_speaker().name if config.SPEAKER_ID is None else config.SPEAKER_ID
+    try:
+        with sc.get_microphone(id=speaker_id, include_loopback=True).recorder(
+                samplerate=config.SAMPLE_RATE) as mic:
+            # record audio with loopback from default speaker.
+            data = mic.record(numframes=config.SAMPLE_RATE * config.SEC)
+    except IndexError:
+        print(f"Couldn't find speaker device '{speaker_id}'. Available options are:")
+        for speaker in sc.all_speakers():
+            print(speaker.name)
+            print("Set config.SPEAKER_ID to one of the above speakers listed")
+            sys.exit(1)
 
-        mean = sum(np.absolute(data)) / len(data)
-        mean = mean[0]
-        caught_fish = True if mean > config.SOUND_THRESH else False
-        print(f"{i} fish volume = {mean:9.5f} --> catch = {caught_fish}")
-        plt.figure(figsize=(5, 1))
-        plt.plot(data)
-        plt.ylim(-0.12, 0.12)
-        plt.title(f"Last {config.SEC} second(s) of audio", size=7)
-        plt.savefig(config.OUTPUT_FOLDER / f"audio_signal_{i}.png", bbox_inches='tight')
-        plt.savefig(config.OUTPUT_FOLDER / f"audio_signal.png", bbox_inches='tight')
-        plt.close()
+    # infer volume from record
+    mean = sum(np.absolute(data)) / len(data)
+    mean = mean[0]
+    caught_fish = True if mean > config.SOUND_THRESH else False
+    print(f"{i} catch = {caught_fish}: fish volume = {mean:9.5f}, speaker = '{speaker_id}'")
 
-        filename = config.OUTPUT_FOLDER / f"sound_{i}.wav"
-        # change "data=data[:, 0]" to "data=data", if you would like to write audio as multiple-channels.
-        sf.write(file=filename, data=data[:, 0], samplerate=config.SAMPLE_RATE)
+    # plot for show/debug
+    plt.figure(figsize=(5, 1))
+    plt.plot(data)
+    plt.ylim(-0.12, 0.12)
+    plt.title(f"Last {config.SEC} second(s) of audio", size=7)
+    plt.savefig(config.OUTPUT_FOLDER / f"audio_signal_{i}.png", bbox_inches='tight')
+    plt.savefig(config.OUTPUT_FOLDER / f"audio_signal.png", bbox_inches='tight')
+    plt.close()
+
+    filename = config.OUTPUT_FOLDER / f"sound_{i}.wav"
+    # change "data=data[:, 0]" to "data=data", if you would like to write audio as multiple-channels.
+    sf.write(file=filename, data=data[:, 0], samplerate=config.SAMPLE_RATE)
+
     return caught_fish
 
 
@@ -151,11 +164,11 @@ def setup():
         print("Please click on WoW window")
         print("", end="", flush=True)
         sleep(2)
-    print("*"*100)
+    print("*" * 100)
     print("Starting to fish...")
 
 
-def fish(hours: float = 3.0/6):
+def fish(hours: float = 3.0 / 6):
     """
     Main wrapper function to fish.
     :param hours: number of hours (can be decimal) to run the program for. Defaults to 30 minutes.
@@ -172,7 +185,7 @@ def fish(hours: float = 3.0/6):
         not_elapsed_time = elapsed_time < seconds_to_run
         print("\n")
         print("*" * 10)
-        print(f"Fish iteration = {counter}, elapsed time = {elapsed_time/60:.3f} mins (max = {mins_to_run:.3f})")
+        print(f"Fish iteration = {counter}, elapsed time = {elapsed_time / 60:.3f} mins (max = {mins_to_run:.3f})")
         hold_key("Fish", uniform(0.9, 1.1))  # throw fish line
         sleep(uniform(0.3, 0.5))  # wait to move cursor
         move_cursor_to_bait()
