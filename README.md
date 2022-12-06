@@ -31,6 +31,7 @@ Setup the game as follows:
 * Turn off all nameplates
 * Options -> Enable Sound -> Effects on 100% (all other sub volumes on 0%)
 * Ensure "Click to Move" is turned off.
+* Ensure Auto Loot is switched on.
 
 Setup program configuration:
 * Keybind fish action to 9, or change ```KEY_LOOKUP``` in the [config](fishing/config.py).
@@ -45,7 +46,8 @@ Run the fishing program via:
 ```commandline
 python -c "import fishing; fishing.fish()"
 ```
-Then click on the game window to begin.
+It will run for a default of 30 minutes. Pass number of hours to the main function e.g. for 2 hours use 
+```fishing.fish(2)```. Then click on the game window to begin.
 
 
 ### Task List

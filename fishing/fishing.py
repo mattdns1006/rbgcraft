@@ -3,7 +3,7 @@ import pyautogui
 import numpy as np
 import PIL.ImageOps
 from numpy.random import uniform
-from time import sleep
+from time import sleep, time
 import soundcard as sc
 import soundfile as sf
 import matplotlib.pyplot as plt
@@ -155,16 +155,24 @@ def setup():
     print("Starting to fish...")
 
 
-def fish():
+def fish(hours: float = 3.0/6):
     """
     Main wrapper function to fish.
+    :param hours: number of hours (can be decimal) to run the program for. Defaults to 30 minutes.
     """
     setup()
+    start_time = time()  # remember when we started
+    seconds_to_run = hours * 60 * 60
+    mins_to_run = seconds_to_run / 60
+    print(f"Running for {mins_to_run:,} minutes)")
     counter = 0
-    while True:
+    not_elapsed_time = True
+    while not_elapsed_time:
+        elapsed_time = time() - start_time
+        not_elapsed_time = elapsed_time < seconds_to_run
         print("\n")
         print("*" * 10)
-        print(f"Fish iteration = {counter}")
+        print(f"Fish iteration = {counter}, elapsed time = {elapsed_time/60:.3f} mins (max = {mins_to_run:.3f})")
         hold_key("Fish", uniform(0.9, 1.1))  # throw fish line
         sleep(uniform(0.3, 0.5))  # wait to move cursor
         move_cursor_to_bait()
@@ -178,3 +186,4 @@ def fish():
                 break
             sleep(0.8)  # wait between sounds
         counter += 1
+    print("Finished fishing.")
