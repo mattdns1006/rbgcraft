@@ -8,5 +8,6 @@ setup(
     license='',
     author='mattdns1006',
     author_email='mattdns100689@gmail.com',
-    description=''
+    description='',
+    exclude=['TestingEnv']  # Add the folder to exclude here
 )

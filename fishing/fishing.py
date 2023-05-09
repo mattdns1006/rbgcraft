@@ -12,8 +12,8 @@ import sys
 
 pix_x, pix_y = config.PIX_X, config.PIX_Y
 
-w = 250
-h = 400
+w = 800
+h = 800
 x = pix_x / 2 - w / 2
 y = -150 + pix_y / 2 - h / 2
 
@@ -94,11 +94,11 @@ def move_cursor_to_bait():
     save_img(f"status_cursor.png", img[:, :, ::-1])
 
 
-def get_fishing_zone_and_bait_coords():
-    """
-    Screen shot the fishing zone, process the image and infer the bait by using the part of the red channel of the
-    image with the most brightness
-    """
+""" def get_fishing_zone_and_bait_coords():
+    
+    #Screen shot the fishing zone, process the image and infer the bait by using the part of the red channel of the
+    #image with the most brightness
+    
     img = pyautogui.screenshot(region=(x, y, w, h))
     img = np.array(img)
     img_raw = img.copy()
@@ -116,6 +116,37 @@ def get_fishing_zone_and_bait_coords():
 
     save_img(f"status.png", img_raw[:, :, ::-1])
     save_img(f"status_blurred.png", img_gray_blurred_for_display)
+
+    return img, max_loc """
+
+def get_fishing_zone_and_bait_coords():
+    """
+    Screen shot the fishing zone, process the image and infer the bait by template matching a bait template
+    """
+    # Load the fishing zone image and the bait template
+    img = pyautogui.screenshot(region=(x, y, w, h))
+    img = np.array(img)
+    img_raw = img.copy()
+
+    img_path = r'D:\00_DEV\00.1-rgbcraft-1\TestingEnv\template.jpg'
+    bait_template = cv2.imread(img_path)
+
+    # Convert the images to grayscale
+    img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    bait_template_gray = cv2.cvtColor(bait_template, cv2.COLOR_BGR2GRAY)
+
+    # Match the template to the fishing zone image
+    match_result = cv2.matchTemplate(img_gray, bait_template_gray, cv2.TM_CCOEFF_NORMED)
+
+    # Find the location of the maximum match value
+    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(match_result)
+
+    # Draw a circle around the bait location in the original image
+    cv2.circle(img, max_loc, 5, 255, 2)
+
+    # Save the original image and the blurred image
+    cv2.imwrite('status.png', img)
+    cv2.imwrite('status_blurred.png', cv2.normalize(match_result, None, 0, 255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F))
 
     return img, max_loc
 
