@@ -91,35 +91,11 @@ def move_cursor_to_bait():
 
     img = pyautogui.screenshot(region=(x, y, w, h))
     img = np.array(img)
-    save_img(f"status_cursor.png", img[:, :, ::-1])
-
-
-""" def get_fishing_zone_and_bait_coords():
-    
-    #Screen shot the fishing zone, process the image and infer the bait by using the part of the red channel of the
-    #image with the most brightness
-    
-    img = pyautogui.screenshot(region=(x, y, w, h))
-    img = np.array(img)
-    img_raw = img.copy()
-
-    img[:, :, 1] = 0
-    img[:, :, 2] = 0
-
-    img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    img_gray_blurred = cv2.blur(img_gray, (20, 20))
-    img_gray_blurred_for_display = \
-        cv2.normalize(img_gray_blurred, None, 0, 255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F)
-    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(img_gray_blurred)
-    cv2.circle(img_raw, max_loc, 5, 255, 2)
-    cv2.circle(img_gray_blurred_for_display, max_loc, 5, 255, 2)
-
-    save_img(f"status.png", img_raw[:, :, ::-1])
-    save_img(f"status_blurred.png", img_gray_blurred_for_display)
-
-    return img, max_loc """
+    save_img(f"status_cursor.jpg", img[:, :, ::-1])
 
 def get_fishing_zone_and_bait_coords():
+    
+    sleep(2)
     """
     Screen shot the fishing zone, process the image and infer the bait by template matching a bait template
     """
@@ -141,14 +117,19 @@ def get_fishing_zone_and_bait_coords():
     # Find the location of the maximum match value
     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(match_result)
 
-    # Draw a circle around the bait location in the original image
-    cv2.circle(img, max_loc, 5, 255, 2)
+    # Draw a rectangle around the bait location in the original image
+    bait_w, bait_h = bait_template_gray.shape[::-1]
+    top_left = max_loc
+    bottom_right = (top_left[0] + bait_w, top_left[1] + bait_h)
+    cv2.rectangle(img, top_left, bottom_right, (0, 255, 0), 2)
+
+    # Get the central position of the rectangle
+    xy_center = (top_left[0] + bait_w/2, top_left[1] + bait_h/2)
 
     # Save the original image and the blurred image
-    cv2.imwrite('status.png', img)
-    cv2.imwrite('status_blurred.png', cv2.normalize(match_result, None, 0, 255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F))
-
-    return img, max_loc
+    save_img(f'status.jpg', img[:, :, ::-1])
+    save_img(f'status_blurred.jpg', cv2.normalize(match_result, None, 0, 255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F))
+    return img, xy_center
 
 
 def wait():
