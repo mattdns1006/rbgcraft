@@ -9,13 +9,14 @@ import soundfile as sf
 import matplotlib.pyplot as plt
 import cv2
 import sys
-
-pix_x, pix_y = config.PIX_X, config.PIX_Y
-
-w = 250
-h = 400
-x = pix_x / 2 - w / 2
-y = -150 + pix_y / 2 - h / 2
+ 
+window = pyautogui.getWindowsWithTitle("World of Warcraft")[0] 
+pix_x = window.width
+pix_y = window.height
+w = window.width // 5.5
+h = window.height // 4.5
+x = int((window.width // 2) - (w // 2))
+y = int((window.height // 2) - (1.2 * h))
 
 
 def hold_key(keybind, seconds=1.00):
@@ -99,25 +100,34 @@ def get_fishing_zone_and_bait_coords():
     Screen shot the fishing zone, process the image and infer the bait by using the part of the red channel of the
     image with the most brightness
     """
-    img = pyautogui.screenshot(region=(x, y, w, h))
+    img = pyautogui.screenshot(region=(x, y, w, h + (y // 7)))
     img = np.array(img)
     img_raw = img.copy()
 
-    img[:, :, 1] = 0
-    img[:, :, 2] = 0
+    # Extract the red channel
+    red_channel = img[:, :, 0]
 
-    img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    img_gray_blurred = cv2.blur(img_gray, (20, 20))
-    img_gray_blurred_for_display = \
-        cv2.normalize(img_gray_blurred, None, 0, 255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F)
-    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(img_gray_blurred)
-    cv2.circle(img_raw, max_loc, 5, 255, 2)
-    cv2.circle(img_gray_blurred_for_display, max_loc, 5, 255, 2)
+    # Invert the red channel to work with least brightness instead of most brightness
+    inverted_red_channel = 255 - red_channel
+
+    # Apply blurring to the inverted red channel
+    inverted_red_blurred = cv2.blur(inverted_red_channel, (20, 20))
+
+    # Normalize for display
+    inverted_red_blurred_for_display = \
+        cv2.normalize(inverted_red_blurred, None, 0, 255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F)
+
+    # Find the location with the minimum brightness
+    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(inverted_red_blurred)
+
+    # Draw circles on the original and blurred images
+    cv2.circle(img_raw, min_loc, 5, 255, 2)
+    cv2.circle(inverted_red_blurred_for_display, min_loc, 5, 255, 2)
 
     save_img(f"status.png", img_raw[:, :, ::-1])
-    save_img(f"status_blurred.png", img_gray_blurred_for_display)
+    save_img(f"status_blurred.png", inverted_red_blurred_for_display)
 
-    return img, max_loc
+    return img, min_loc
 
 
 def wait():
@@ -187,7 +197,7 @@ def fish(hours: float = 3.0 / 6):
         print("*" * 10)
         print(f"Fish iteration = {counter}, elapsed time = {elapsed_time / 60:.3f} mins (max = {mins_to_run:.3f})")
         hold_key("Fish", uniform(0.9, 1.1))  # throw fish line
-        sleep(uniform(0.3, 0.5))  # wait to move cursor
+        sleep(uniform(1.5, 1.9))  # wait to move cursor
         move_cursor_to_bait()
         for i in range(8):
             hear_fish_sound = get_sound(i)

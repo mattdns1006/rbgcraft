@@ -1,6 +1,7 @@
 /local/
 /.idea/
 /out/
+/temp/
 
 
 # Byte-compiled / optimized / DLL files
