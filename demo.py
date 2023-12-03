@@ -13,6 +13,10 @@ import sys
 from PIL import Image
 from PIL import ImageEnhance
 
+import pytesseract
+import re
+
+
 SPEAKER_ID = None  # speaker to listen to for fish sound
 SOUND_THRESH = 0.002  # sound threshold for catching fish.
 OUTPUT_FOLDER = Path(r"temp")  # where to save outputs (images/audio plots) for debugging
@@ -143,10 +147,61 @@ def wow_queue_alert():
     It uses image recognition to examine screenshots taken periodically while your queue is showing on your screen.
     """
     img = Image.open(OUTPUT_FOLDER / "queue.png")
-    width, height = img.size
-    img = img.crop((width*.3, height*.3, width*.7, height*.6))
+    # width, height = img.size
+    # img = img.crop((width*.3, height*.3, width*.7, height*.6))
     img = img.point(lambda p: p > 128 and 255)
     img = ImageEnhance.Color(img).enhance(0)
     save_img(f"wow_queue_alert.png", img)
+    
+    imgdata = pytesseract.image_to_data(img, output_type=pytesseract.Output.DICT)
+    print(imgdata['text'])
+    # imgtext = ' '.join([x for i,x in enumerate(imgdata['text']) if int(imgdata['conf'][i]) >= 70])
+    # imgtime = re.search(r'time[^\d+]*(\d+)', imgtext).group(1)
+    
+    # print(imgtext)
 
-wow_queue_alert()
+
+def modify_image():
+    import pytesseract
+    import cv2
+    import random
+
+    # Carga la imagen
+    image = Image.open(OUTPUT_FOLDER / "queue.png")
+    image = image.point(lambda p: p > 128 and 255)
+    image = ImageEnhance.Color(image).enhance(0)
+
+    # Detecta el texto en la imagen
+    text = pytesseract.image_to_string(image)
+
+    # Crea una lista de palabras
+    words = text.split()
+
+    # Inicializa un diccionario para almacenar los colores de las palabras
+    colors = {}
+    
+    print(words)
+
+    # Itera sobre las palabras
+    for word in words:
+        # Obtiene un color aleatorio
+        color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+
+        # Almacena el color en el diccionario
+        colors[word] = color
+
+    # Itera sobre las palabras nuevamente
+    for word in words:
+        # Encuentra la posición de la palabra en la imagen
+        (x, y, w, h) = cv2.boundingRect(cv2.imread(f"{OUTPUT_FOLDER}/queue.png", cv2.IMREAD_COLOR))
+
+
+        "queue_mod.png"
+        # Dibuja la palabra en la imagen con el color correspondiente
+        cv2.putText(image, word, (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1, colors[word], 2)
+
+        save_img(f"test_image.png", image)
+
+
+
+modify_image()
