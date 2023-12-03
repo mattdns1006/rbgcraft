@@ -5,8 +5,9 @@ SOUND_THRESH = 0.002  # sound threshold for catching fish.
 OUTPUT_FOLDER = Path(r"temp")  # where to save outputs (images/audio plots) for debugging
 PIX_X, PIX_Y = 2560, 1369  # size of screen in pixels
 SEC = 1
+HALF_SEC = 0.5
 SAMPLE_RATE = 48000  # audio sample rate
-WAIT_PARAMETER = 2  # parameter passed to exponential distribution to sample wait time in seconds
+WAIT_PARAMETER = 1  # parameter passed to exponential distribution to sample wait time in seconds
 
 KEY_LOOKUP = {
     "Interact": "8",

@@ -40,7 +40,7 @@ def get_sound(i):
         with sc.get_microphone(id=speaker_id, include_loopback=True).recorder(
                 samplerate=config.SAMPLE_RATE) as mic:
             # record audio with loopback from default speaker.
-            data = mic.record(numframes=config.SAMPLE_RATE * config.SEC)
+            data = mic.record(numframes=int(config.SAMPLE_RATE * config.HALF_SEC))
     except IndexError:
         print(f"Couldn't find speaker device '{speaker_id}'. Available options are:")
         for speaker in sc.all_speakers():
@@ -54,18 +54,18 @@ def get_sound(i):
     caught_fish = True if mean > config.SOUND_THRESH else False
     print(f"{i} catch = {caught_fish}: fish volume = {mean:9.5f}, speaker = '{speaker_id}'")
 
-    # plot for show/debug
-    plt.figure(figsize=(5, 1))
-    plt.plot(data)
-    plt.ylim(-0.12, 0.12)
-    plt.title(f"Last {config.SEC} second(s) of audio", size=7)
-    plt.savefig(config.OUTPUT_FOLDER / f"audio_signal_{i}.png", bbox_inches='tight')
-    plt.savefig(config.OUTPUT_FOLDER / f"audio_signal.png", bbox_inches='tight')
-    plt.close()
+    # # plot for show/debug
+    # plt.figure(figsize=(5, 1))
+    # plt.plot(data)
+    # plt.ylim(-0.12, 0.12)
+    # plt.title(f"Last {config.SEC} second(s) of audio", size=7)
+    # plt.savefig(config.OUTPUT_FOLDER / f"audio_signal_{i}.png", bbox_inches='tight')
+    # plt.savefig(config.OUTPUT_FOLDER / f"audio_signal.png", bbox_inches='tight')
+    # plt.close()
 
-    filename = config.OUTPUT_FOLDER / f"sound_{i}.wav"
-    # change "data=data[:, 0]" to "data=data", if you would like to write audio as multiple-channels.
-    sf.write(file=filename, data=data[:, 0], samplerate=config.SAMPLE_RATE)
+    # filename = config.OUTPUT_FOLDER / f"sound_{i}.wav"
+    # # change "data=data[:, 0]" to "data=data", if you would like to write audio as multiple-channels.
+    # sf.write(file=filename, data=data[:, 0], samplerate=config.SAMPLE_RATE)
 
     return caught_fish
 
@@ -199,7 +199,7 @@ def fish(hours: float = 3.0 / 6):
         hold_key("Fish", uniform(0.9, 1.1))  # throw fish line
         sleep(uniform(1.5, 1.9))  # wait to move cursor
         move_cursor_to_bait()
-        for i in range(8):
+        for i in range(26):
             hear_fish_sound = get_sound(i)
             if hear_fish_sound:
                 pyautogui.click(button='right')
@@ -207,6 +207,6 @@ def fish(hours: float = 3.0 / 6):
                 print("Fish caught!!!")
                 wait()  # wait random amount of time after catching
                 break
-            sleep(0.8)  # wait between sounds
+            sleep(0.2)  # wait between sounds
         counter += 1
     print("Finished fishing.")

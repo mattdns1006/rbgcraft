@@ -11,7 +11,7 @@ import cv2
 import sys
 
 from PIL import Image
-
+from PIL import ImageEnhance
 
 SPEAKER_ID = None  # speaker to listen to for fish sound
 SOUND_THRESH = 0.002  # sound threshold for catching fish.
@@ -47,6 +47,7 @@ def save_img(filename: str, img: np.array):
         img.save(OUTPUT_FOLDER / filename)
     else:
         cv2.imwrite(str(OUTPUT_FOLDER / filename), img)
+
 
 def get_fishing_zone_and_bait_coords():
     """
@@ -105,12 +106,10 @@ def get_fishing_zone_and_bait_coords_v2():
     save_img(f"status_blurred_2.png", inverted_red_blurred_for_display)
 
 
-
 def get_fishing_zone_and_bait_coords_v3():
     img = Image.open(OUTPUT_FOLDER / "test2.png")
     img = np.array(img)
     img_raw = img.copy()
-
 
     # Calculate the dimensions of the square
     image_height, image_width, _ = img.shape
@@ -136,21 +135,18 @@ def get_fishing_zone_and_bait_coords_v3():
     # Draw the thick red square
     cv2.rectangle(img_raw, (top_left_x, top_left_y), (bottom_right_x, bottom_right_y), (0, 0, 255), -1)
     save_img(f"status_2.png", img_raw[:, :, ::-1])
-
-
-    # # Calculate the width and height of the square
-    # square_width = img.shape[1] // 6
-    # square_height = img.shape[0] // 5
-
-    # # Calculate the position of the square
-    # start_x = int(0.2 * img.shape[1])
-    # end_x = start_x + square_width
-    # start_y = int(2.2 * img.shape[0])
-    # end_y = start_y + square_height
-
-    # # Draw a red square on the image
-    # cv2.rectangle(img_raw, (start_x, start_y), (end_x, end_y), (0, 0, 255), 2)
     
 
+def wow_queue_alert():
+    """
+    Watch your Wow Classic queue and alert you when your queue is nearly up! 
+    It uses image recognition to examine screenshots taken periodically while your queue is showing on your screen.
+    """
+    img = Image.open(OUTPUT_FOLDER / "queue.png")
+    width, height = img.size
+    img = img.crop((width*.3, height*.3, width*.7, height*.6))
+    img = img.point(lambda p: p > 128 and 255)
+    img = ImageEnhance.Color(img).enhance(0)
+    save_img(f"wow_queue_alert.png", img)
 
-get_fishing_zone_and_bait_coords_v3()
+wow_queue_alert()
