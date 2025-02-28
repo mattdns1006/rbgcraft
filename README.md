@@ -4,7 +4,7 @@
 
 ### Overview
 
-Automatic fishing in WoW, using a combination of: mouse/keyboard automation, audio processing, and basic computer 
+Automatic fishing, using a combination of: mouse/keyboard automation, audio processing, and basic computer 
 vision techniques. See [YouTube Video](https://www.youtube.com/watch?v=5yYr2v4B-wY). 
 
 This project was done for educational purposes.
